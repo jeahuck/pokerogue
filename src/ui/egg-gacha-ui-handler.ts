@@ -577,6 +577,8 @@ export default class EggGachaUiHandler extends MessageUiHandler {
             if (!this.scene.gameData.voucherCounts[VoucherType.REGULAR]) {
               error = true;
               this.showError(i18next.t("egg:notEnoughVouchers"));
+              this.consumeVouchers(VoucherType.REGULAR, 1);
+              this.pull();
             } else if (this.scene.gameData.eggs.length < 99) {
               this.consumeVouchers(VoucherType.REGULAR, 1);
               this.pull();
@@ -590,6 +592,8 @@ export default class EggGachaUiHandler extends MessageUiHandler {
             if (!this.scene.gameData.voucherCounts[VoucherType.PLUS]) {
               error = true;
               this.showError(i18next.t("egg:notEnoughVouchers"));
+              this.consumeVouchers(VoucherType.PLUS, 1);
+              this.pull(5);
             } else if (this.scene.gameData.eggs.length < 95) {
               this.consumeVouchers(VoucherType.PLUS, 1);
               this.pull(5);
@@ -605,6 +609,13 @@ export default class EggGachaUiHandler extends MessageUiHandler {
                   || (this.cursor === 3 && !this.scene.gameData.voucherCounts[VoucherType.PREMIUM])) {
               error = true;
               this.showError(i18next.t("egg:notEnoughVouchers"));
+              if (this.cursor === 3) {
+                this.consumeVouchers(VoucherType.PREMIUM, 1);
+              } else {
+                this.consumeVouchers(VoucherType.REGULAR, 10);
+              }
+              this.pull(10);
+
             } else if (this.scene.gameData.eggs.length < 90) {
               if (this.cursor === 3) {
                 this.consumeVouchers(VoucherType.PREMIUM, 1);
@@ -622,6 +633,9 @@ export default class EggGachaUiHandler extends MessageUiHandler {
             if (!this.scene.gameData.voucherCounts[VoucherType.GOLDEN]) {
               error = true;
               this.showError(i18next.t("egg:notEnoughVouchers"));
+              this.consumeVouchers(VoucherType.GOLDEN, 1);
+              this.pull(25);
+              success = true;
             } else if (this.scene.gameData.eggs.length < 75) {
               this.consumeVouchers(VoucherType.GOLDEN, 1);
               this.pull(25);

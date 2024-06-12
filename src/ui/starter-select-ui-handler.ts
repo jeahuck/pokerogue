@@ -430,6 +430,8 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
       let s = 0;
       this.genSpecies.push([]);
 
+      // console.log('???-->', allSpecies)
+      console.log("???-->", this.genSpecies);
       for (const species of allSpecies) {
         if (!speciesStarters.hasOwnProperty(species.speciesId) || species.generation !== g + 1 || !species.isObtainable()) {
           continue;
@@ -1747,11 +1749,14 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
 
     this.lastSpecies = species;
 
-    if (species && (this.speciesStarterDexEntry?.seenAttr || this.speciesStarterDexEntry?.caughtAttr)) {
+    console.log("--->>????",species, this.speciesStarterDexEntry);
+    if (species) {
+    // if (species && (this.speciesStarterDexEntry?.seenAttr || this.speciesStarterDexEntry?.caughtAttr)) {
       this.pokemonNumberText.setText(Utils.padInt(species.speciesId, 4));
       this.pokemonNameText.setText(species.name);
 
-      if (this.speciesStarterDexEntry?.caughtAttr) {
+      // if (this.speciesStarterDexEntry?.caughtAttr) {
+      if (true) {
         const colorScheme = starterColors[species.speciesId];
 
         const luck = this.scene.gameData.getDexAttrLuck(this.speciesStarterDexEntry.caughtAttr);
@@ -2187,9 +2192,11 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
   }
 
   tryUpdateValue(add?: integer): boolean {
-    const value = this.starterGens.reduce((total: integer, gen: integer, i: integer) => total += this.scene.gameData.getSpeciesStarterValue(this.genSpecies[gen][this.starterCursors[i]].speciesId), 0);
-    const newValue = value + (add || 0);
-    const valueLimit = this.getValueLimit();
+    // const value = this.starterGens.reduce((total: integer, gen: integer, i: integer) => total += this.scene.gameData.getSpeciesStarterValue(this.genSpecies[gen][this.starterCursors[i]].speciesId), 0);
+    // const newValue = value + (add || 0);
+    const newValue = 0;
+    // const valueLimit = this.getValueLimit();
+    const valueLimit = 9999;
     const overLimit = newValue > valueLimit;
     let newValueStr = newValue.toString();
     if (newValueStr.startsWith("0.")) {
@@ -2280,7 +2287,7 @@ export default class StarterSelectUiHandler extends MessageUiHandler {
               passive: !(thisObj.scene.gameData.starterData[starterSpecies.speciesId].passiveAttr ^ (PassiveAttr.ENABLED | PassiveAttr.UNLOCKED)),
               nature: thisObj.starterNatures[i] as Nature,
               moveset: thisObj.starterMovesets[i],
-              pokerus: !![ 0, 1, 2 ].filter(n => thisObj.pokerusGens[n] === starterSpecies.generation - 1 && thisObj.pokerusCursors[n] === thisObj.genSpecies[starterSpecies.generation - 1].indexOf(starterSpecies)).length
+              pokerus: true
             };
           }));
         };
