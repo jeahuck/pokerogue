@@ -180,6 +180,28 @@ export default class MenuUiHandler extends MessageUiHandler {
       }
     );
 
+    manageDataOptions.push(
+      {
+        label: i18next.t("menuUiHandler:fireBaseImportData"),
+        handler: () => {
+          this.scene.gameData.fireBaseImportData(GameDataType.SYSTEM);
+          return true;
+        },
+        keepOpen: true
+      }
+    );
+
+    manageDataOptions.push(
+      {
+        label: i18next.t("menuUiHandler:fireBaseExportData"),
+        handler: () => {
+          this.scene.gameData.tryTestExportData(GameDataType.SYSTEM);
+          return true;
+        },
+        keepOpen: true
+      }
+    );
+
     this.manageDataConfig = {
       xOffset: 98,
       options: manageDataOptions

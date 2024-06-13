@@ -40,6 +40,11 @@ import { PlayerGender } from "#app/data/enums/player-gender";
 import { GameDataType } from "#app/data/enums/game-data-type";
 import ChallengeData from "./challenge-data";
 
+import { initializeApp } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { FirebaseConfig } from "../data/firebaseConfig";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+
 const saveKey = "x0i2O7WRiANTqPmZ"; // Temporary; secure encryption is not yet necessary
 
 export function getDataTypeKey(dataType: GameDataType, slotId: integer = 0): string {
@@ -241,6 +246,8 @@ export class GameData {
   public eggPity: integer[];
   public unlockPity: integer[];
 
+  public firebaseConfig: FirebaseConfig;
+
   constructor(scene: BattleScene) {
     this.scene = scene;
     this.loadSettings();
@@ -268,6 +275,15 @@ export class GameData {
     this.unlockPity = [0, 0, 0, 0];
     this.initDexData();
     this.initStarterData();
+    this.firebaseConfig = {
+      apiKey: "AIzaSyBMF3DBXT4DlytCs_O4nAtWjMqRAh_AOPY",
+      authDomain: "jhy-react-base.firebaseapp.com",
+      projectId: "jhy-react-base",
+      storageBucket: "jhy-react-base.appspot.com",
+      messagingSenderId: "419661727650",
+      appId: "1:419661727650:web:b05ae70afa7212cbde14fb",
+      measurementId: "G-9JY8EWEP0F"
+    };
   }
 
   public getSystemSaveData(): SystemSaveData {
@@ -1194,6 +1210,46 @@ export class GameData {
     });
   }
 
+  public tryTestExportData(dataType: GameDataType, slotId: integer = 0): Promise<boolean> {
+    return new Promise<boolean>(resolve => {
+      const dataKey: string = `${getDataTypeKey(dataType, slotId)}_${loggedInUser.username}`;
+      const handleData = async (dataStr: string) => {
+        switch (dataType) {
+        case GameDataType.SYSTEM:
+          dataStr = this.convertSystemDataStr(dataStr, true);
+          break;
+        }
+        const encryptedData = AES.encrypt(dataStr, saveKey);
+        // const blob = new Blob([ encryptedData.toString() ], {type: "text/json"});
+
+        const app = initializeApp(this.firebaseConfig);
+        const firestoreDb = getFirestore(app);
+
+        const docRef = doc(firestoreDb, "poke", "pokeInfo");
+
+        await setDoc(docRef, {save: encryptedData.toString()});
+
+        // const docRef = doc(firestoreDb, "poke", "pokeInfo");
+        const docSnap = await getDoc(docRef);
+
+        console.log("테스트입니다만", docSnap.data().save);
+
+
+        // const link = document.createElement("a");
+        // link.href = window.URL.createObjectURL(blob);
+        // link.download = `${dataKey}.prsv`;
+        // link.click();
+        // link.remove();
+      };
+      const data = localStorage.getItem(dataKey);
+      if (data) {
+        handleData(decrypt(data, bypassLogin));
+      }
+      resolve(!!data);
+
+    });
+  }
+
   public importData(dataType: GameDataType, slotId: integer = 0): void {
     const dataKey = `${getDataTypeKey(dataType, slotId)}_${loggedInUser.username}`;
 
@@ -1221,6 +1277,113 @@ export class GameData {
                 dataStr = this.convertSystemDataStr(dataStr);
                 const systemData = this.parseSystemData(dataStr);
                 valid = !!systemData.dexData && !!systemData.timestamp;
+                break;
+              case GameDataType.SESSION:
+                const sessionData = this.parseSessionData(dataStr);
+                valid = !!sessionData.party && !!sessionData.enemyParty && !!sessionData.timestamp;
+                break;
+              case GameDataType.SETTINGS:
+              case GameDataType.TUTORIALS:
+                valid = true;
+                break;
+              }
+            } catch (ex) {
+              console.error(ex);
+            }
+
+            let dataName: string;
+            switch (dataType) {
+            case GameDataType.SYSTEM:
+              dataName = "save";
+              break;
+            case GameDataType.SESSION:
+              dataName = "session";
+              break;
+            case GameDataType.SETTINGS:
+              dataName = "settings";
+              break;
+            case GameDataType.TUTORIALS:
+              dataName = "tutorials";
+              break;
+            }
+
+            const displayError = (error: string) => this.scene.ui.showText(error, null, () => this.scene.ui.showText(null, 0), Utils.fixedInt(1500));
+
+            if (!valid) {
+              return this.scene.ui.showText(`Your ${dataName} data could not be loaded. It may be corrupted.`, null, () => this.scene.ui.showText(null, 0), Utils.fixedInt(1500));
+            }
+            this.scene.ui.revertMode();
+            this.scene.ui.showText(`Your ${dataName} data will be overridden and the page will reload. Proceed?`, null, () => {
+              this.scene.ui.setOverlayMode(Mode.CONFIRM, () => {
+                localStorage.setItem(dataKey, encrypt(dataStr, bypassLogin));
+
+                if (!bypassLogin && dataType < GameDataType.SETTINGS) {
+                  updateUserInfo().then(success => {
+                    if (!success) {
+                      return displayError(`Could not contact the server. Your ${dataName} data could not be imported.`);
+                    }
+                    Utils.apiPost(`savedata/update?datatype=${dataType}${dataType === GameDataType.SESSION ? `&slot=${slotId}` : ""}&trainerId=${this.trainerId}&secretId=${this.secretId}&clientSessionId=${clientSessionId}`, dataStr, undefined, true)
+                      .then(response => response.text())
+                      .then(error => {
+                        if (error) {
+                          console.error(error);
+                          return displayError(`An error occurred while updating ${dataName} data. Please contact the administrator.`);
+                        }
+                        window.location = window.location;
+                      });
+                  });
+                } else {
+                  window.location = window.location;
+                }
+              }, () => {
+                this.scene.ui.revertMode();
+                this.scene.ui.showText(null, 0);
+              }, false, -98);
+            });
+          };
+        })((e.target as any).files[0]);
+
+        reader.readAsText((e.target as any).files[0]);
+      }
+    );
+    saveFile.click();
+    /*(this.scene.plugins.get('rexfilechooserplugin') as FileChooserPlugin).open({ accept: '.prsv' })
+      .then(result => {
+    });*/
+  }
+
+  public fireBaseImportData(dataType: GameDataType, slotId: integer = 0): void {
+    const dataKey = `${getDataTypeKey(dataType, slotId)}_${loggedInUser.username}`;
+
+    let saveFile: any = document.getElementById("saveFile");
+    if (saveFile) {
+      saveFile.remove();
+    }
+
+    saveFile = document.createElement("input");
+    saveFile.id = "saveFile";
+    saveFile.type = "file";
+    saveFile.accept = ".prsv";
+    saveFile.style.display = "none";
+    saveFile.addEventListener("change",
+      e => {
+        const reader = new FileReader();
+
+        reader.onload = (_ => {
+          return async e => {
+            const dataStr = AES.decrypt(e.target.result.toString(), saveKey).toString(enc.Utf8);
+            let valid = false;
+            try {
+              switch (dataType) {
+              case GameDataType.SYSTEM:
+                // dataStr = this.convertSystemDataStr(dataStr);
+                // const systemData = this.parseSystemData(dataStr);
+                const app = initializeApp(this.firebaseConfig);
+                const firestoreDb = getFirestore(app);
+                const docRef = doc(firestoreDb, "poke", "pokeInfo");
+                const docSnap = await getDoc(docRef);
+
+                valid = !!docSnap.data().save;
                 break;
               case GameDataType.SESSION:
                 const sessionData = this.parseSessionData(dataStr);

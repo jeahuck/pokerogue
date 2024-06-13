@@ -42,6 +42,7 @@
 	"dependencies": {
 		"@material/material-color-utilities": "^0.2.7",
 		"crypto-js": "^4.2.0",
+		"firebase": "^10.12.2",
 		"i18next": "^23.11.1",
 		"i18next-browser-languagedetector": "^7.2.1",
 		"i18next-korean-postposition-processor": "^1.0.0",
