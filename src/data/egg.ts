@@ -44,11 +44,11 @@ export function getEggTierDefaultHatchWaves(tier: EggTier): integer {
   case EggTier.COMMON:
     return 10;
   case EggTier.GREAT:
-    return 25;
+    return 11;
   case EggTier.ULTRA:
-    return 50;
+    return 12;
   }
-  return 100;
+  return 13;
 }
 
 export function getEggDescriptor(egg: Egg): string {

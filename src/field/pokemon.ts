@@ -1334,9 +1334,12 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
       console.log("REAL SHINY!!");
     }
 
+    this.shiny = true;
     if (this.shiny) {
       this.initShinySparkle();
     }
+
+    console.log("id -->",this.id);
 
     return this.shiny;
   }

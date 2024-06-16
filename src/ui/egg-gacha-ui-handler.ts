@@ -380,9 +380,18 @@ export default class EggGachaUiHandler extends MessageUiHandler {
     if (!eggs) {
       eggs = [];
       const tierValueOffset = this.gachaCursor === GachaType.LEGENDARY ? 1 : 0;
+      // const tiers = new Array(pullCount).fill(null).map(() => {
+      //   const tierValue = Utils.randInt(256);
+      //   return tierValue >= 52 + tierValueOffset ? EggTier.COMMON : tierValue >= 8 + tierValueOffset ? EggTier.GREAT : tierValue >= 1 + tierValueOffset ? EggTier.ULTRA : EggTier.MASTER;
+      // });
+
+      // const tiers = new Array(pullCount).fill(null).map(() => {
+      //   const tierValue = Utils.randInt(256);
+      //   return tierValue >= 52 + tierValueOffset ? EggTier.GREAT : tierValue >= 8 + tierValueOffset ? EggTier.ULTRA : tierValue >= 1 + tierValueOffset ? EggTier.MASTER : EggTier.COMMON;
+      // });
+
       const tiers = new Array(pullCount).fill(null).map(() => {
-        const tierValue = Utils.randInt(256);
-        return tierValue >= 52 + tierValueOffset ? EggTier.COMMON : tierValue >= 8 + tierValueOffset ? EggTier.GREAT : tierValue >= 1 + tierValueOffset ? EggTier.ULTRA : EggTier.MASTER;
+        return EggTier.MASTER;
       });
       if (pullCount >= 25 && !tiers.filter(t => t >= EggTier.ULTRA).length) {
         tiers[Utils.randInt(tiers.length)] = EggTier.ULTRA;
