@@ -549,6 +549,8 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
     }
     this.add(shinySparkle);
 
+    console.log("???-->",this.variant, shinySparkle);
+
     this.shinySparkle = shinySparkle;
   }
 
@@ -1360,6 +1362,18 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
         variantDataIndex = `${variantDataIndex}-${formKey}`;
       }
     }
+
+    if (true) {
+      const rand = Utils.randSeedInt(5);
+      if (rand === 0) {
+        return 0;             // 6/10
+      } else if (rand === 1) {
+        return 1;             // 3/10
+      } else {
+        return 2;             // 1/10
+      }
+    }
+
     // Checks if there is no variant data for both the index or index with form
     if (!this.shiny || (!variantData.hasOwnProperty(variantDataIndex) && !variantData.hasOwnProperty(this.species.speciesId))) {
       return 0;
