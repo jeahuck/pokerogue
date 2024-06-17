@@ -1,4 +1,4 @@
-import { SimpleTranslationEntries } from "#app/plugins/i18n";
+import { SimpleTranslationEntries } from "#app/interfaces/locales";
 
 /**
  * The menu namespace holds most miscellaneous text that isn't directly part of the game's
@@ -34,8 +34,6 @@ export const menu: SimpleTranslationEntries = {
   "sessionSuccess": "会话加载成功。",
   "failedToLoadSession": "无法加载您的会话数据。它可能已损坏。",
   "boyOrGirl": "你是男孩还是女孩？",
-  "boy": "男孩",
-  "girl": "女孩",
   "evolving": "咦？\n{{pokemonName}} 开始进化了！",
   "stoppedEvolving": "{{pokemonName}} 停止了进化。",
   "pauseEvolutionsQuestion": "你确定要停止 {{pokemonName}} 的进化吗？\n你可以在队伍界面中重新进化。",
@@ -54,5 +52,5 @@ export const menu: SimpleTranslationEntries = {
   "yes": "是",
   "no": "否",
   "disclaimer": "DISCLAIMER",
-  "disclaimerDescription": "This game is an unfinished product; it might have playability issues (including the potential loss of save data),\n change without notice, and may or may not be updated further or completed."
+  "disclaimerDescription": "This game is an unfinished product; it might have playability issues (including the potential loss of save data),\n change without notice, and may or may not be updated further or completed.",
 } as const;
