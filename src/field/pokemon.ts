@@ -5,6 +5,7 @@ import { variantData } from "#app/data/variant";
 import BattleInfo, { PlayerBattleInfo, EnemyBattleInfo } from "../ui/battle-info";
 import Move, { HighCritAttr, HitsTagAttr, applyMoveAttrs, FixedDamageAttr, VariableAtkAttr, VariablePowerAttr, allMoves, MoveCategory, TypelessAttr, CritOnlyAttr, getMoveTargets, OneHitKOAttr, MultiHitAttr, VariableMoveTypeAttr, StatusMoveTypeImmunityAttr, MoveTarget, VariableDefAttr, AttackMove, ModifiedDamageAttr, VariableMoveTypeMultiplierAttr, IgnoreOpponentStatChangesAttr, SacrificialAttr, VariableMoveCategoryAttr, CounterDamageAttr, StatChangeAttr, RechargeAttr, ChargeAttr, IgnoreWeatherTypeDebuffAttr, BypassBurnDamageReductionAttr, SacrificialAttrOnHit, MoveFlags } from "../data/move";
 import { default as PokemonSpecies, PokemonSpeciesForm, SpeciesFormKey, getFusedSpeciesName, getPokemonSpecies, getPokemonSpeciesForm, getStarterValueFriendshipCap, speciesStarters, starterPassiveAbilities } from "../data/pokemon-species";
+import { Constructor } from "#app/utils";
 import * as Utils from "../utils";
 import { Type, TypeDamageMultiplier, getTypeDamageMultiplier, getTypeRgb } from "../data/type";
 import { getLevelTotalExp } from "../data/exp";
@@ -1066,7 +1067,7 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
    * @param {boolean} ignoreOverride If true, it ignores ability changing effects
    * @returns {boolean} Whether an ability with that attribute is present and active
    */
-  hasAbilityWithAttr(attrType: { new(...args: any[]): AbAttr }, canApply: boolean = true, ignoreOverride?: boolean): boolean {
+  hasAbilityWithAttr(attrType: Constructor<AbAttr>, canApply: boolean = true, ignoreOverride?: boolean): boolean {
     if ((!canApply || this.canApplyAbility()) && this.getAbility(ignoreOverride).hasAttr(attrType)) {
       return true;
     }
@@ -1747,10 +1748,9 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
     if (typeless) {
       typeMultiplier.value = 1;
     }
-    if (types.find(t => move.isTypeImmune(t))) {
+    if (types.find(t => move.isTypeImmune(source, this, t))) {
       typeMultiplier.value = 0;
     }
-
 
     // Apply arena tags for conditional protection
     if (!move.checkFlag(MoveFlags.IGNORE_PROTECT, source, this) && !move.isAllyTarget()) {
@@ -2122,7 +2122,7 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
     return false;
   }
 
-  getTag(tagType: BattlerTagType | { new(...args: any[]): BattlerTag }): BattlerTag {
+  getTag(tagType: BattlerTagType | Constructor<BattlerTag>): BattlerTag {
     if (!this.summonData) {
       return null;
     }
@@ -2138,7 +2138,7 @@ export default abstract class Pokemon extends Phaser.GameObjects.Container {
     return this.summonData.tags.find(t => tagFilter(t));
   }
 
-  getTags(tagType: BattlerTagType | { new(...args: any[]): BattlerTag }): BattlerTag[] {
+  getTags(tagType: BattlerTagType | Constructor<BattlerTag>): BattlerTag[] {
     if (!this.summonData) {
       return [];
     }
